@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101010">
+  <title>SecretFeed</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #101010;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      padding: 18px;
+      background: #181818;
+      border-bottom: 1px solid #333;
+      position: sticky;
+      top: 0;
+    }
+    header h2 { margin: 0; color: #7c5cff; }
+    .subtitle { color: #aaa; font-size: 13px; }
+    .feed { max-width: 500px; margin: auto; padding: 12px; }
+    .card {
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .user { padding: 14px; font-weight: bold; }
+    .video {
+      width: 100%;
+      aspect-ratio: 9 / 12;
+      background: #292633;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #ddd;
+    }
+    .play { font-size: 54px; color: #9b83ff; }
+    .caption { padding: 14px; line-height: 1.6; }
+    .actions { display: flex; gap: 10px; padding: 0 14px 14px; }
+    button {
+      background: #30264d;
+      color: white;
+      border: 0;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-size: 14px;
+    }
+    .note { color: #999; font-size: 12px; padding: 4px 14px 14px; }
+    footer { text-align: center; color: #777; padding: 25px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>✦ SecretFeed</h2>
+    <div class="subtitle">Your videos. Your space.</div>
+  </header>
+
+  <main class="feed">
+    <div class="card">
+      <div class="user">👤 Azmain · Sample video</div>
+      <div class="video">
+        <div class="play">▶</div>
+        <div>Your video feed starts here</div>
+      </div>
+      <div class="caption">
+        আজকের ভিডিওটা খুবই ইন্টারেস্টিং হতে চলেছে 🤯
+        তাই সম্পূর্ণ ভিডিওটা দেখার অনুরোধ রইলো।
+      </div>
+      <div class="actions">
+        <button type="button" onclick="demoMessage()">♡ Like</button>
+        <button type="button" onclick="demoMessage()">💬 Comment</button>
+      </div>
+      <div class="note">Demo preview · No real video uploaded yet</div>
+    </div>
+
+    <footer>SecretFeed · Early Preview</footer>
+  </main>
+
+  <script>
+    function demoMessage() {
+      alert("This is an early preview. Real features will be added step by step.");
+    }
+  </script>
+</body>
+</html>
