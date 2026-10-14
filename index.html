@@ -2,125 +2,616 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090909">
+<title>SecretFeed</title>
 <link rel="icon" type="image/png" href="secretfeed-logo.png">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#000000">
-<title>SecretFeed</title>
+
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:Arial,sans-serif}
-body{overflow:hidden}
-.app{height:100dvh;display:flex;flex-direction:column;background:#000}
-.top{height:48px;display:flex;align-items:center;justify-content:center;gap:20px;flex-shrink:0;background:#000;z-index:3}
-.top span{font-size:15px;color:#aaa}
-.top .active{font-weight:bold;color:#fff;border-bottom:2px solid #fff;padding-bottom:7px}
-.brand{position:absolute;left:12px;font-size:17px;font-weight:bold;color:#a58bff}
-.feed{flex:1;min-height:0;position:relative;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}
-.feed::-webkit-scrollbar{display:none}
-.video-card{height:100%;height:100%;position:relative;scroll-snap-align:start;background:#171717;overflow:hidden}
-.video-card video{width:100%;height:100%;object-fit:cover;background:#171717}
-.placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:linear-gradient(145deg,#282137,#111);color:#ddd}
-.placeholder .play{font-size:60px;color:#a58bff}
-.placeholder small{color:#aaa}
-.uploaded{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.right{position:absolute;right:10px;bottom:100px;display:flex;flex-direction:column;align-items:center;gap:19px;z-index:2}
-.action{border:0;background:transparent;color:#fff;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:25px;text-shadow:0 1px 4px #000;padding:0}
-.action small{font-size:11px}
-.avatar{width:43px;height:43px;border:2px solid white;border-radius:50%;background:#a58bff;display:grid;place-items:center;font-size:22px}
-.info{position:absolute;left:12px;right:75px;bottom:18px;text-shadow:0 1px 4px #000;z-index:2}
-.username{font-weight:bold;margin-bottom:8px}
-.caption{font-size:14px;line-height:1.5;overflow-wrap:anywhere}
-.sound{font-size:12px;margin-top:8px}
-.bottom{height:58px;flex-shrink:0;display:flex;justify-content:space-around;align-items:center;background:#080808;border-top:1px solid #222;z-index:4}
-.nav{border:0;background:none;color:#aaa;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px}
-.nav b{font-size:21px;color:inherit}
-.nav.active{color:#fff}
-.plus{font-size:26px!important;color:#000!important;background:#fff;border-radius:7px;padding:0 10px;line-height:25px}
-input[type=file]{display:none}
-.toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;padding:12px 16px;border-radius:10px;z-index:8;display:none}
-@media(min-width:600px){.app{max-width:440px;margin:auto;border-left:1px solid #222;border-right:1px solid #222}.top,.bottom{flex-shrink:0}}
+:root {
+  --bg: #090909;
+  --panel: #171717;
+  --red: #ff2638;
+  --text: #ffffff;
+  --muted: #a5a5a5;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+}
+button, input, textarea { font: inherit; }
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 12px;
+  cursor: pointer;
+}
+button:disabled { opacity: .55; }
+.primary { background: var(--red); color: white; }
+.secondary { background: #292929; color: white; }
+input, textarea {
+  width: 100%;
+  padding: 13px;
+  border-radius: 9px;
+  border: 1px solid #383838;
+  background: #101010;
+  color: white;
+  margin: 6px 0 12px;
+}
+textarea { resize: vertical; }
+header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #090909f5;
+  border-bottom: 1px solid #292929;
+  padding: 13px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand { font-size: 22px; font-weight: bold; }
+.brand span { color: var(--red); }
+main { max-width: 620px; margin: auto; padding: 14px; }
+.panel {
+  background: var(--panel);
+  border: 1px solid #292929;
+  border-radius: 13px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+h2 { font-size: 19px; margin-top: 0; }
+h3 { font-size: 16px; }
+.small { color: var(--muted); font-size: 13px; }
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; min-width: 0; }
+.hidden { display: none !important; }
+#message {
+  position: fixed;
+  bottom: 20px;
+  left: 5%;
+  width: 90%;
+  max-width: 500px;
+  z-index: 20;
+  padding: 13px;
+  border-radius: 10px;
+  background: #303030;
+  display: none;
+}
+.video-card { padding: 0; overflow: hidden; }
+.video-info { padding: 13px; }
+.video-player {
+  display: block;
+  width: 100%;
+  max-height: 75vh;
+  background: #000;
+  object-fit: contain;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.actions button { padding: 9px 12px; }
+nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+nav button { flex: 1; }
+#feed { scroll-margin-top: 70px; }
+hr { border: 0; border-top: 1px solid #333; margin: 15px 0; }
+label { font-size: 14px; }
 </style>
 </head>
-<body>
-<div class="app">
-  <header class="top">
-    <div class="brand">✦ SF</div>
-    <span>Following</span><span class="active">For You</span>
-  </header>
 
-  <main class="feed" id="feed">
-    <section class="video-card">
-      <div class="placeholder" id="placeholder">
-        <div class="play">▶</div>
-        <strong>SecretFeed</strong>
-        <small>তোর ভিডিও এখানে দেখা যাবে</small>
-        <button onclick="document.getElementById('file').click()" style="background:#a58bff;border:0;padding:10px 15px;border-radius:8px">＋ ভিডিও যোগ কর</button>
+<body>
+<header>
+  <div class="brand">Secret<span>Feed</span></div>
+  <button class="secondary" id="profileButton" onclick="showProfile()">
+    Profile
+  </button>
+</header>
+
+<main>
+  <section id="authPanel" class="panel">
+    <h2>SecretFeed-এ প্রবেশ কর</h2>
+    <p class="small">Email দিয়ে অ্যাকাউন্ট খুলে ভিডিও শেয়ার কর।</p>
+
+    <label for="email">Email address</label>
+    <input id="email" type="email" placeholder="তোর ইমেইল" autocomplete="email">
+
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="কমপক্ষে ৬ অক্ষর">
+
+    <div class="row">
+      <button class="primary" onclick="signUp()">Sign Up</button>
+      <button class="secondary" onclick="signIn()">Login</button>
+    </div>
+
+    <button class="secondary" style="width:100%;margin-top:10px"
+      onclick="googleLogin()">Continue with Google</button>
+
+    <p class="small">
+      Email confirmation চালু থাকলে ইমেইলে আসা লিংক দিয়ে অ্যাকাউন্ট নিশ্চিত কর।
+    </p>
+  </section>
+
+  <section id="appPanel" class="hidden">
+    <div class="panel">
+      <div id="welcome">SecretFeed</div>
+      <p class="small" id="userEmail"></p>
+      <button class="secondary" onclick="signOut()">Logout</button>
+    </div>
+
+    <nav>
+      <button class="primary" onclick="showHome()">Home</button>
+      <button class="secondary" onclick="showProfile()">My Profile</button>
+      <button class="secondary" onclick="showUpload()">Upload</button>
+    </nav>
+
+    <section id="homeView">
+      <div id="feed">
+        <p class="small">ভিডিও লোড হচ্ছে...</p>
       </div>
-      <video id="video" playsinline loop controls style="display:none"></video>
-      <div class="right">
-        <div class="avatar">👤</div>
-        <button class="action" onclick="like(this)">♡<small>Like</small></button>
-        <button class="action" onclick="showMsg('কমেন্ট ফিচার পরে যুক্ত হবে')">▢<small>Comment</small></button>
-        <button class="action" onclick="showMsg('ভিডিও শেয়ার করতে ব্রাউজারের Share অপশন ব্যবহার কর')">➦<small>Share</small></button>
-        <button class="action" onclick="showMsg('ফেভারিট ফিচার পরে যুক্ত হবে')">☆<small>Favorite</small></button>
-      </div>
-      <div class="info">
-        <div class="username">@Azmain · SecretFeed</div>
-        <div class="caption" id="caption">আমার প্রথম SecretFeed ভিডিও 🤯 #SecretFeed</div>
-        <div class="sound">♫ Original sound - Azmain</div>
+      <button id="loadMoreButton" class="secondary hidden"
+        style="width:100%" onclick="loadFeed()">Refresh Feed</button>
+    </section>
+
+    <section id="uploadView" class="hidden">
+      <div class="panel">
+        <h2>Upload Video</h2>
+        <label for="videoFile">ভিডিও বেছে নে</label>
+        <input id="videoFile" type="file" accept="video/*">
+        <label for="caption">ভিডিওর Caption</label>
+        <textarea id="caption" rows="3" maxlength="2000"
+          placeholder="ভিডিও সম্পর্কে লিখ..."></textarea>
+        <button class="primary" id="uploadButton"
+          style="width:100%" onclick="uploadVideo()">Upload Video</button>
+        <p class="small">ইন্টারনেট ও ভিডিও ফাইলের সাইজ অনুযায়ী সময় লাগতে পারে।</p>
       </div>
     </section>
-  </main>
 
-  <div id="toast" class="toast"></div>
-  <input id="file" type="file" accept="video/*">
-  <nav class="bottom">
-    <button class="nav active" onclick="goHome()"><b>⌂</b>Home</button>
-    <button class="nav" onclick="showMsg('Discover ফিচার পরে যুক্ত হবে')"><b>⌕</b>Discover</button>
-    <button class="nav" onclick="document.getElementById('file').click()"><b class="plus">＋</b>Upload</button>
-    <button class="nav" onclick="showMsg('Inbox ফিচার পরে যুক্ত হবে')"><b>✉</b>Inbox</button>
-    <button class="nav" onclick="showMsg('Profile ফিচার পরের ধাপে তৈরি করব')"><b>♙</b>Profile</button>
-  </nav>
-</div>
+    <section id="profileView" class="hidden">
+      <div class="panel">
+        <h2>My Profile</h2>
+        <label for="displayName">তোর নাম</label>
+        <input id="displayName" maxlength="60" placeholder="Display name">
+        <button class="primary" onclick="saveProfile()">Save Profile</button>
+        <hr>
+        <h3>আমার ভিডিও</h3>
+        <div id="myVideos"></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<div id="message"></div>
+
 <script>
-const file=document.getElementById('file');
-file.addEventListener('change',function(){
-  const f=this.files&&this.files[0];
-  if(!f)return;
-  if(!f.type.startsWith('video/')){showMsg('একটি ভিডিও ফাইল নির্বাচন কর');return;}
-  const video=document.getElementById('video');
-  video.src=URL.createObjectURL(f);
-  video.style.display='block';
-  document.getElementById('placeholder').style.display='none';
-  video.play().catch(()=>{});
-  document.getElementById('caption').textContent=f.name;
-  showMsg('ভিডিওটি এই ফোনে প্রিভিউ হচ্ছে');
-});
-function like(btn){
-  const liked=btn.dataset.liked==='true';
-  btn.dataset.liked=String(!liked);
-  btn.firstChild.textContent=liked?'♡':'♥';
-  btn.style.color=liked?'#fff':'#ff4f82';
-}
-function showMsg(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.style.display='block';
-  clearTimeout(window.toastTimer);
-  window.toastTimer=setTimeout(()=>t.style.display='none',2200);
-}
-function goHome(){
-  document.getElementById('feed').scrollTo({top:0,behavior:'smooth'});
-}
+/* নিজের Supabase Publishable Key এখানে বসাবি */
 const SUPABASE_URL = 'https://wwrltvuyhfsldsdnqigo.supabase.com';
-const SUPABASE_KEY = 'sb_publishable_E1NcO2u3rg4a41Ig9IaZWA_iY-bBiW6';
+const SUPABASE_PUBLISHABLE_KEY = 'PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE';
+
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_KEY
+  SUPABASE_PUBLISHABLE_KEY
 );
+
+let currentUser = null;
+let videoObjects = [];
+let feedLoading = false;
+
+function showMsg(message) {
+  const box = document.getElementById('message');
+  box.textContent = message;
+  box.style.display = 'block';
+  clearTimeout(showMsg.timer);
+  showMsg.timer = setTimeout(() => box.style.display = 'none', 4000);
+}
+
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[c]);
+}
+
+function showOnly(view) {
+  ['homeView', 'uploadView', 'profileView'].forEach(id => {
+    document.getElementById(id).classList.toggle('hidden', id !== view);
+  });
+}
+
+function showHome() {
+  showOnly('homeView');
+  loadFeed();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showUpload() {
+  showOnly('uploadView');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function showProfile() {
+  if (!currentUser) {
+    showMsg('আগে Login কর।');
+    return;
+  }
+  showOnly('profileView');
+  await loadProfile();
+  await loadMyVideos();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function signUp() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!email || password.length < 6) {
+    showMsg('সঠিক Email এবং কমপক্ষে ৬ অক্ষরের Password দে।');
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) return showMsg(error.message);
+
+  if (data.session) {
+    showMsg('অ্যাকাউন্ট তৈরি হয়েছে!');
+  } else {
+    showMsg('অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল চেক করে নিশ্চিত কর।');
+  }
+}
+
+async function signIn() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!email || !password) return showMsg('Email ও Password দে।');
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) return showMsg(error.message);
+  showMsg('Login সফল!');
+}
+
+async function googleLogin() {
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname
+    }
+  });
+
+  if (error) showMsg(error.message);
+}
+
+async function signOut() {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) return showMsg(error.message);
+  showMsg('Logout হয়েছে।');
+}
+
+async function refreshSession() {
+  const { data } = await supabaseClient.auth.getUser();
+  currentUser = data.user || null;
+
+  document.getElementById('authPanel').classList.toggle('hidden', !!currentUser);
+  document.getElementById('appPanel').classList.toggle('hidden', !currentUser);
+
+  if (currentUser) {
+    document.getElementById('userEmail').textContent = currentUser.email || '';
+    await loadProfile();
+    await loadFeed();
+  }
+}
+
+async function loadProfile() {
+  if (!currentUser) return;
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('display_name')
+    .eq('id', currentUser.id)
+    .maybeSingle();
+
+  if (error) {
+    console.warn(error.message);
+    return;
+  }
+
+  const name = data?.display_name || '';
+  document.getElementById('displayName').value = name;
+  document.getElementById('welcome').textContent =
+    name ? 'স্বাগতম, ' + name : 'স্বাগতম, SecretFeed ব্যবহারকারী';
+}
+
+async function saveProfile() {
+  if (!currentUser) return;
+
+  const display_name = document.getElementById('displayName').value.trim();
+
+  const { error } = await supabaseClient
+    .from('profiles')
+    .upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      display_name,
+      updated_at: new Date().toISOString()
+    });
+
+  if (error) return showMsg('Profile save হয়নি: ' + error.message);
+  showMsg('Profile save হয়েছে!');
+  await loadProfile();
+}
+
+async function uploadVideo() {
+  if (!currentUser) return showMsg('আগে Login কর।');
+
+  const file = document.getElementById('videoFile').files[0];
+  const caption = document.getElementById('caption').value.trim();
+
+  if (!file) return showMsg('আগে একটি ভিডিও বেছে নে।');
+  if (!file.type.startsWith('video/')) return showMsg('ভিডিও ফাইল বেছে নে।');
+
+  const button = document.getElementById('uploadButton');
+  button.disabled = true;
+  button.textContent = 'Uploading...';
+
+  try {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = currentUser.id + '/' + Date.now() + '_' + safeName;
+
+    const { error: storageError } = await supabaseClient.storage
+      .from('videos')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type
+      });
+
+    if (storageError) throw storageError;
+
+    const { error: insertError } = await supabaseClient
+      .from('videos')
+      .insert({
+        user_id: currentUser.id,
+        video_url: path,
+        caption: caption
+      });
+
+    if (insertError) {
+      await supabaseClient.storage.from('videos').remove([path]);
+      throw insertError;
+    }
+
+    document.getElementById('videoFile').value = '';
+    document.getElementById('caption').value = '';
+    showMsg('ভিডিও Upload হয়েছে!');
+    showHome();
+  } catch (error) {
+    showMsg('Upload হয়নি: ' + (error.message || 'অজানা সমস্যা'));
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Upload Video';
+  }
+}
+
+async function getVideoURL(path) {
+  if (!path) return null;
+
+  const { data, error } = await supabaseClient.storage
+    .from('videos')
+    .createSignedUrl(path, 3600);
+
+  if (error) {
+    console.warn('Video URL error:', error.message);
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
+async function loadFeed() {
+  if (!currentUser || feedLoading) return;
+  feedLoading = true;
+
+  const feed = document.getElementById('feed');
+  feed.innerHTML = '<p class="small">ভিডিও লোড হচ্ছে...</p>';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('videos')
+      .select('id,user_id,video_url,caption,likes_count,created_at')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (error) throw error;
+
+    videoObjects = data || [];
+
+    if (!videoObjects.length) {
+      feed.innerHTML = '<div class="panel">এখনো কোনো ভিডিও নেই। প্রথম ভিডিওটি তুই Upload কর!</div>';
+      return;
+    }
+
+    feed.innerHTML = '';
+
+    for (const video of videoObjects) {
+      const url = await getVideoURL(video.video_url);
+      const card = document.createElement('article');
+      card.className = 'panel video-card';
+
+      const caption = escapeHTML(video.caption || '');
+      const date = video.created_at
+        ? new Date(video.created_at).toLocaleString('bn-BD')
+        : '';
+
+      card.innerHTML = `
+        ${url ? `<video class="video-player" controls playsinline preload="metadata" src="${escapeHTML(url)}"></video>`
+              : '<div class="video-info">ভিডিও দেখা যাচ্ছে না। Storage permission পরীক্ষা করতে হবে।</div>'}
+        <div class="video-info">
+          <div>${caption || '<span class="small">কোনো Caption নেই</span>'}</div>
+          <p class="small">${escapeHTML(date)}</p>
+          <div class="actions">
+            ${video.user_id === currentUser.id
+              ? `<button class="secondary" data-edit="${escapeHTML(video.id)}">Edit Caption</button>
+                 <button class="secondary" data-delete="${escapeHTML(video.id)}">Delete</button>`
+              : ''}
+          </div>
+        </div>`;
+
+      feed.appendChild(card);
+    }
+
+    feed.querySelectorAll('[data-edit]').forEach(button => {
+      button.addEventListener('click', () => editCaption(button.dataset.edit));
+    });
+
+    feed.querySelectorAll('[data-delete]').forEach(button => {
+      button.addEventListener('click', () => deleteVideo(button.dataset.delete));
+    });
+
+  } catch (error) {
+    feed.innerHTML = '<div class="panel">Feed লোড হয়নি: ' +
+      escapeHTML(error.message) + '</div>';
+  } finally {
+    feedLoading = false;
+  }
+}
+
+async function loadMyVideos() {
+  const box = document.getElementById('myVideos');
+  box.innerHTML = '<p class="small">লোড হচ্ছে...</p>';
+
+  const { data, error } = await supabaseClient
+    .from('videos')
+    .select('id,caption,created_at')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    box.textContent = 'ভিডিও লোড হয়নি: ' + error.message;
+    return;
+  }
+
+  if (!data.length) {
+    box.textContent = 'তোর কোনো ভিডিও এখনো নেই।';
+    return;
+  }
+
+  box.innerHTML = '';
+
+  data.forEach(video => {
+    const item = document.createElement('div');
+    item.className = 'panel';
+    item.innerHTML = `
+      <p>${escapeHTML(video.caption || 'Caption not available')}</p>
+      <button class="secondary" data-edit="${escapeHTML(video.id)}">Edit Caption</button>
+      <button class="secondary" data-delete="${escapeHTML(video.id)}">Delete</button>`;
+
+    item.querySelector('[data-edit]').addEventListener('click',
+      () => editCaption(video.id));
+    item.querySelector('[data-delete]').addEventListener('click',
+      () => deleteVideo(video.id));
+
+    box.appendChild(item);
+  });
+}
+
+async function editCaption(id) {
+  const video = videoObjects.find(v => String(v.id) === String(id));
+
+  let oldCaption = video?.caption || '';
+
+  if (!video) {
+    const { data, error } = await supabaseClient
+      .from('videos')
+      .select('id,caption')
+      .eq('id', id)
+      .eq('user_id', currentUser.id)
+      .single();
+
+    if (error) return showMsg(error.message);
+    oldCaption = data.caption || '';
+  }
+
+  const newCaption = prompt('Entar the new caption:', oldCaption);
+  if (newCaption === null) return;
+
+  const { error } = await supabaseClient
+    .from('videos')
+    .update({ caption: newCaption.trim() })
+    .eq('id', id)
+    .eq('user_id', currentUser.id);
+
+  if (error) return showMsg('Edit হয়নি: ' + error.message);
+
+  showMsg('Caption change successfully!');
+  await loadFeed();
+  await loadMyVideos();
+}
+
+async function deleteVideo(id) {
+  if (!confirm('you want to delete the video?')) return;
+
+  const { data: video, error: findError } = await supabaseClient
+    .from('videos')
+    .select('id,video_url')
+    .eq('id', id)
+    .eq('user_id', currentUser.id)
+    .single();
+
+  if (findError) return showMsg('No videos found.: ' + findError.message);
+
+  const { error: deleteError } = await supabaseClient
+    .from('videos')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', currentUser.id);
+
+  if (deleteError) return showMsg('Delete হয়নি: ' + deleteError.message);
+
+  if (video.video_url) {
+    const { error: storageError } = await supabaseClient.storage
+      .from('videos')
+      .remove([video.video_url]);
+
+    if (storageError) {
+      showMsg('ভিডিওর তথ্য মুছেছে, কিন্তু Storage ফাইল মুছতে পারেনি।');
+    } else {
+      showMsg('video dellete successfully!');
+    }
+  }
+
+  await loadFeed();
+  await loadMyVideos();
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user || null;
+  setTimeout(() => refreshSession(), 0);
+});
+
+refreshSession();
 </script>
 </body>
 </html>
