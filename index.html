@@ -126,10 +126,10 @@ label { font-size: 14px; }
     <p class="small">Email দিয়ে অ্যাকাউন্ট খুলে ভিডিও শেয়ার কর।</p>
 
     <label for="email">Email address</label>
-    <input id="email" type="email" placeholder="তোর ইমেইল" autocomplete="email">
+    <input id="email" type="email" placeholder="Your email" autocomplete="email">
 
     <label for="password">Password</label>
-    <input id="password" type="password" placeholder="কমপক্ষে ৬ অক্ষর">
+    <input id="password" type="password" placeholder="minimum 6 digit">
 
     <div class="row">
       <button class="primary" onclick="signUp()">Sign Up</button>
@@ -159,7 +159,7 @@ label { font-size: 14px; }
 
     <section id="homeView">
       <div id="feed">
-        <p class="small">ভিডিও লোড হচ্ছে...</p>
+        <p class="small">loding...</p>
       </div>
       <button id="loadMoreButton" class="secondary hidden"
         style="width:100%" onclick="loadFeed()">Refresh Feed</button>
@@ -168,11 +168,11 @@ label { font-size: 14px; }
     <section id="uploadView" class="hidden">
       <div class="panel">
         <h2>Upload Video</h2>
-        <label for="videoFile">ভিডিও বেছে নে</label>
+        <label for="videoFile">choose your video</label>
         <input id="videoFile" type="file" accept="video/*">
-        <label for="caption">ভিডিওর Caption</label>
+        <label for="caption">Entar Caption</label>
         <textarea id="caption" rows="3" maxlength="2000"
-          placeholder="ভিডিও সম্পর্কে লিখ..."></textarea>
+          placeholder="write about video..."></textarea>
         <button class="primary" id="uploadButton"
           style="width:100%" onclick="uploadVideo()">Upload Video</button>
         <p class="small">ইন্টারনেট ও ভিডিও ফাইলের সাইজ অনুযায়ী সময় লাগতে পারে।</p>
@@ -182,11 +182,11 @@ label { font-size: 14px; }
     <section id="profileView" class="hidden">
       <div class="panel">
         <h2>My Profile</h2>
-        <label for="displayName">তোর নাম</label>
+        <label for="displayName">Your Name</label>
         <input id="displayName" maxlength="60" placeholder="Display name">
         <button class="primary" onclick="saveProfile()">Save Profile</button>
         <hr>
-        <h3>আমার ভিডিও</h3>
+        <h3>My videos</h3>
         <div id="myVideos"></div>
       </div>
     </section>
@@ -198,7 +198,7 @@ label { font-size: 14px; }
 <script>
 /* নিজের Supabase Publishable Key এখানে বসাবি */
 const SUPABASE_URL = 'https://wwrltvuyhfsldsdnqigo.supabase.com';
-const SUPABASE_PUBLISHABLE_KEY = 'PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_E1NcO2u3rg4a41Ig9IaZWA_iY-bBiW6';
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
@@ -260,7 +260,7 @@ async function signUp() {
   const password = document.getElementById('password').value;
 
   if (!email || password.length < 6) {
-    showMsg('সঠিক Email এবং কমপক্ষে ৬ অক্ষরের Password দে।');
+    showMsg('Provide a valid email and a password of at least 6 characters.');
     return;
   }
 
@@ -272,9 +272,9 @@ async function signUp() {
   if (error) return showMsg(error.message);
 
   if (data.session) {
-    showMsg('অ্যাকাউন্ট তৈরি হয়েছে!');
+    showMsg('Account created!');
   } else {
-    showMsg('অ্যাকাউন্ট তৈরি হয়েছে। ইমেইল চেক করে নিশ্চিত কর।');
+    showMsg('Account created. Please check your email to confirm');
   }
 }
 
@@ -290,7 +290,7 @@ async function signIn() {
   });
 
   if (error) return showMsg(error.message);
-  showMsg('Login সফল!');
+  showMsg('Login success!');
 }
 
 async function googleLogin() {
